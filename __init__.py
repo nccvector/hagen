@@ -24,16 +24,18 @@ def NewLine():
 
 class AbstractBaseTag:
     _validElements = None
-    _content = None
+    _contents = None
     _operations = None
     _kwargs = {}
-    def __init__(self, content: object, validElements=[], **kwargs):
+    def __init__(self, contents: list[object], validElements=[], **kwargs):
         self._kwargs = kwargs
         self._validElements = validElements
-        if len(self._validElements) > 0 and ClassName(content) not in self._validElements:
-            raise Exception('Invalid args passed to "' + ClassName(self) + '"\nSupported elements are: ' + str(self._validElements))
 
-        self._content = content
+        for content in contents:
+            if len(self._validElements) > 0 and ClassName(content) not in self._validElements:
+                raise Exception('Invalid args passed to "' + ClassName(self) + '"\nSupported elements are: ' + str(self._validElements))
+
+        self._contents = contents
         self._operations = [
             self.Open,
             self.GetContentString,
@@ -54,26 +56,29 @@ class AbstractBaseTag:
         return output
 
     def GetContentString(self):
-        return str(self._content)
+        output = ''
+        for content in self._contents:
+            output += str(content)
+        return output
 
 
 # ================================================================================
 # Head elements
 # ================================================================================
 class meta(AbstractBaseTag):
-    def __init__(self, content: str, **kwargs):
-        super(GetClassAttrib(self), self).__init__(content, **kwargs)
+    def __init__(self, contents: list[str], **kwargs):
+        super(GetClassAttrib(self), self).__init__(contents, **kwargs)
 
 
 class title(AbstractBaseTag):
     def __init__(self, content: str, **kwargs):
-        super(GetClassAttrib(self), self).__init__(content, **kwargs)
+        super(GetClassAttrib(self), self).__init__([content], **kwargs)
 
 
 class head(AbstractBaseTag):
-    def __init__(self, content: AbstractBaseTag, **kwargs):
+    def __init__(self, contents: list[AbstractBaseTag], **kwargs):
         validElements = ['meta', 'link', 'title', 'style', 'script', 'noscript', 'base']
-        super(GetClassAttrib(self), self).__init__(content, validElements, **kwargs)
+        super(GetClassAttrib(self), self).__init__(contents, validElements, **kwargs)
 
 # ================================================================================
 
@@ -83,16 +88,16 @@ class head(AbstractBaseTag):
 # ================================================================================
 class h1(AbstractBaseTag):
     def __init__(self, content: str, **kwargs):
-        super(GetClassAttrib(self), self).__init__(content, **kwargs)
+        super(GetClassAttrib(self), self).__init__([content], **kwargs)
 
 class p(AbstractBaseTag):
     def __init__(self, content: str, **kwargs):
-        super(GetClassAttrib(self), self).__init__(content, **kwargs)
+        super(GetClassAttrib(self), self).__init__([content], **kwargs)
 
 class body(AbstractBaseTag):
-    def __init__(self, content: AbstractBaseTag, **kwargs):
+    def __init__(self, contents: list[AbstractBaseTag], **kwargs):
         validElements = ['h1', 'p']
-        super(GetClassAttrib(self), self).__init__(content, validElements, **kwargs)
+        super(GetClassAttrib(self), self).__init__(contents, validElements, **kwargs)
 
 # ================================================================================
 
@@ -101,8 +106,8 @@ class body(AbstractBaseTag):
 # Body elements
 # ================================================================================
 class footer(AbstractBaseTag):
-    def __init__(self, content: AbstractBaseTag, **kwargs):
-        super(GetClassAttrib(self), self).__init__(content, **kwargs)
+    def __init__(self, contents: list[AbstractBaseTag], **kwargs):
+        super(GetClassAttrib(self), self).__init__(contents, **kwargs)
 
 # ================================================================================
 
@@ -144,9 +149,23 @@ if __name__ == '__main__':
     htmlString = '<!DOCTYPE html>'
     htmlString += str(
         html(
-            head(title('I am Head', font="1.0"), someRandom="random", someRandom2="2"),
-            body(p('I am body')),
-            footer('I am footer'),
+            head([
+                    title('I am Title 1', font="1.0"),
+                    title('I am Title 2', font="1.0"),
+                ],
+                someRandomHeadAttrib="random",
+            ),
+            body([
+                    p('I am paragraph 1'),
+                    p('I am paragraph 2'),
+                ],
+                randomBodyAttrib="random"
+            ),
+            footer([
+                    p('I am footer object'),
+                ],
+                randomFooterAttrib="footer"
+            ),
             randomHtmlAttrib="ABC"
         )
     )
