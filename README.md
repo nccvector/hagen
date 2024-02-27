@@ -1,2 +1,2 @@
 # hagen
-Personal portfolio management tool
+Personal portfolio management experiment
